@@ -93,6 +93,10 @@ rosrun moveit_scripts execute.py
 
 Once the execute.py script has analyzed the scene it will listen for commands on which tool and affordance to grasp on the topic "objects_affordances_id".
 
+##### Trouble shooting
+
+You might need to make the python scripts executeable with chmod +x
+
 ### Authors
 
 Albert Daugbjerg Christensen  
