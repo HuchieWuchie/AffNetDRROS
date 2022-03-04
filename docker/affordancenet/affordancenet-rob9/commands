@@ -1,0 +1,2 @@
+docker build -t affordancenet-ros .
+docker run --name affordancenet-ROS -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix --net=host --gpus all --rm affordancenet-ros /bin/bash

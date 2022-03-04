@@ -1,0 +1,50 @@
+FROM nvidia/cuda:11.4.2-cudnn8-devel-ubuntu18.04
+ENV DEBIAN_FRONTEND noninteractive
+
+# Installing prerequisites
+RUN apt-get update
+RUN apt-get install git-all -y
+#COPY sources.list /etc/apt/sources.list
+RUN apt update
+RUN apt upgrade -y
+RUN apt install apt-utils -y
+#RUN apt build-dep caffe-cuda -y
+# Compiling and installing Caffe with python support
+
+RUN apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-dev libhdf5-serial-dev protobuf-compiler -y
+RUN apt-get install libboost-all-dev -y
+RUN apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev -y
+RUN apt-get install libatlas-base-dev build-essential cmake pkg-config libgflags-dev libgoogle-glog-dev liblmdb-dev -y
+RUN apt-get install libqtgui4 libqt4-test -y
+RUN apt-get install python-dev python-numpy python-scipy python3-dev python3-numpy python3-scipy -y
+
+#Install demo python packages
+
+RUN apt install python-pip -y
+RUN pip install setuptools Cython
+RUN pip install numpy==1.7.1 protobuf==3.0.0a2
+RUN pip install easydict
+RUN pip install scikit-build
+RUN pip install opencv-python==4.2.0.32
+RUN apt-get install python-decorator
+RUN pip install scikit-image
+RUN pip install Pillow==2.3.0
+RUN pip install protobuf
+RUN pip install pyyaml
+RUN apt install nano
+
+RUN git clone https://github.com/nqanh/affordance-net.git
+WORKDIR affordance-net/caffe-affordance-net
+COPY Makefile.config Makefile.config
+RUN make -j8
+RUN make pycaffe -j8
+
+#Install affordance-net
+WORKDIR /affordance-net/lib
+RUN make
+
+COPY AffordanceNet_200K.caffemodel /affordance-net/pretrained/AffordanceNet_200K.caffemodel
+
+COPY test.py /affordance-net/lib/fast_rcnn/test.py
+WORKDIR /affordance-net/tools
+ENTRYPOINT export PYTHONPATH=/affordance-net/caffe-affordance-net/python:$PYTHONPATH && /bin/bash

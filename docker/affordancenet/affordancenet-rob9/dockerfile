@@ -1,0 +1,50 @@
+FROM huchiewuchie/affordancenet-base
+ENV DEBIAN_FRONTEND noninteractive
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+#################### Installing ROS melodic ####################################
+
+RUN apt-get update && \
+    apt-get install -q -y --no-install-recommends tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+    dirmngr \
+    gnupg2 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros1-latest.list
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-melodic-ros-base=1.4.1-0* \
+    && rm -rf /var/lib/apt/lists/*
+
+############# Installing prerequisites   #######################################
+RUN apt update
+RUN apt-get install apt-utils -y
+RUN apt-get install python-pip -y
+RUN apt-get install libusb-1.0-0-dev -y
+RUN apt-get install ros-melodic-cv-bridge -y
+RUN pip install pyyaml rospkg pyrealsense2 numpy scikit-build
+RUN pip install opencv-python==4.2.0.32
+
+######################## Compiling realsense #################################
+
+# Compiling realsense-service for ROS
+ARG INCUBATOR_VER=unknown
+WORKDIR /ROB9/src
+COPY affordanceAnalyzer/package.xml /ROB9/src/affordanceAnalyzer/package.xml
+COPY affordanceAnalyzer/CMakeLists.txt /ROB9/src/affordanceAnalyzer/CMakeLists.txt
+COPY affordanceAnalyzer/setup.py /ROB9/src/affordanceAnalyzer/setup.py
+COPY affordanceAnalyzer/srv /ROB9/src/affordanceAnalyzer/srv
+COPY affordanceAnalyzer/scripts/affordancenet /ROB9/src/affordanceAnalyzer/scripts/affordancenet
+RUN cp /ROB9/src/affordanceAnalyzer/scripts/affordancenet/lib/test.py /affordance-net/lib/fast_rcnn/test.py
+WORKDIR /ROB9
+RUN /bin/bash -c '. /opt/ros/melodic/setup.bash; cd /ROB9; catkin_make'
+
+################### Setting up the affordance net ros #########################
+
+
+ENTRYPOINT source /ROB9/devel/setup.bash && export PYTHONPATH=/affordance-net/caffe-affordance-net/python:$PYTHONPATH && export QT_X11_NO_MITSHM=1 && /bin/bash

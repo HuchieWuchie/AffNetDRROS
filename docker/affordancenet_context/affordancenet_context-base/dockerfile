@@ -1,0 +1,57 @@
+FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04
+ENV DEBIAN_FRONTEND noninteractive
+
+# Installing prerequisites
+RUN apt-get update
+RUN apt-get install git -y
+RUN apt install apt-utils -y
+# Compiling and installing Caffe with python support
+
+RUN apt-get install libprotobuf-dev libleveldb-dev libsnappy-dev libopencv-dev libhdf5-dev libhdf5-serial-dev protobuf-compiler -y
+RUN apt-get install libboost-all-dev -y
+RUN apt-get install libgflags-dev libgoogle-glog-dev liblmdb-dev -y
+RUN apt-get install libatlas-base-dev build-essential cmake pkg-config libgflags-dev libgoogle-glog-dev liblmdb-dev -y
+RUN apt-get install libqtgui4 libqt4-test -y
+RUN apt-get install python-dev python-numpy python-scipy -y
+RUN apt-get install python3-dev python3-numpy python3-scipy -y
+
+#Install demo python packages
+
+RUN apt install python-pip -y
+RUN pip install setuptools Cython
+RUN pip install numpy==1.7.1 protobuf==3.0.0a2
+RUN pip install easydict
+RUN pip install scikit-build
+RUN pip install opencv-python==4.2.0.32
+RUN apt-get install python-decorator
+RUN pip install scikit-image
+RUN pip install Pillow==2.3.0
+RUN pip install protobuf
+RUN pip install pyyaml
+RUN apt-get install python-tk -y
+
+# Compiling and installing Caffe with python support
+
+WORKDIR /workspace
+RUN git clone https://github.com/nqanh/affordance-net.git
+RUN git clone https://github.com/ivalab/affordanceNet_Context.git
+RUN cp -R /workspace/affordance-net/caffe-affordance-net /workspace/affordanceNet_Context/caffe-affordance-net
+WORKDIR /workspace/affordanceNet_Context/caffe-affordance-net
+COPY Makefile.config Makefile.config
+RUN make -j8
+RUN make pycaffe -j8
+
+# Install affordancenet context
+
+WORKDIR /workspace/affordanceNet_Context/lib
+RUN make
+WORKDIR /workspace/affordanceNet_Context/tools
+
+# COPY files
+ARG INCUBATOR_VER=unknown
+COPY vgg16_faster_rcnn_iter_110000_pam_7attribute.caffemodel /workspace/affordanceNet_Context/pretrained/vgg16_faster_rcnn_iter_110000_pam_7attribute.caffemodel
+COPY _init_paths.py _init_paths.py
+COPY test.py /workspace/affordanceNet_Context/lib/fast_rcnn/test.py
+COPY server.py server.py
+
+ENTRYPOINT export PYTHONPATH=/workspace/affordanceNet_Context/caffe-affordance-net/python:$PYTHONPATH && export QT_X11_NO_MITSHM=1 && /bin/bash

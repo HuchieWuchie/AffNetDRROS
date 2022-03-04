@@ -1,0 +1,3 @@
+sudo docker build -t affordancenet .
+docker run -ti affordancenet caffe --version
+sudo docker run --name aff -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix --gpus all --rm affordancenet /bin/bash

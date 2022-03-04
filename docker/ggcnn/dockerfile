@@ -1,0 +1,21 @@
+FROM nvidia/cuda:10.2-cudnn8-devel-ubuntu18.04
+ENV DEBIAN_FRONTEND noninteractive
+
+# Installing prerequisites
+RUN apt-get update --fix-missing
+RUN apt-get install git -y
+RUN apt install apt-utils -y
+RUN apt install python3-pip -y
+
+# Install ggcnn
+RUN git clone https://github.com/dougsm/ggcnn.git
+WORKDIR ggcnn
+RUN python3 -m pip install -U --force-reinstall pip
+RUN pip3 install scikit-build
+RUN pip3 install numpy
+RUN pip3 install opencv-python==4.2.0.32
+RUN pip3 install matplotlib
+RUN pip3 install scikit-image imageio
+RUN pip3 install torch
+RUN pip3 install torchvision torchsummary
+RUN pip3 install tensorboardX

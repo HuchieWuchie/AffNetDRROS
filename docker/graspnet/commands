@@ -1,0 +1,2 @@
+docker build --build-arg INCUBATOR_VER=$(date +%Y%m%d-%H%M%S) -t huchiewuchie/graspnet .
+docker run --name graspnet-con -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix/:/tmp/.X11-unix --net=host --gpus all --rm huchiewuchie/graspnet /bin/bash

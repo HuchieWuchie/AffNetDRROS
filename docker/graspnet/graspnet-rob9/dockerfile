@@ -1,0 +1,67 @@
+FROM huchiewuchie/graspnet-base as build
+ENV DEBIAN_FRONTEND noninteractive
+
+############# Installing prerequisites   #######################################
+
+RUN apt-get update
+RUN apt-get install iproute2 -y
+
+#################### Installing ROS melodic ####################################
+
+RUN apt-get update && \
+    apt-get install -q -y --no-install-recommends tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -q -y --no-install-recommends \
+    dirmngr \
+    gnupg2 \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN echo "deb http://packages.ros.org/ros/ubuntu bionic main" > /etc/apt/sources.list.d/ros1-latest.list
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-melodic-ros-base \
+    && rm -rf /var/lib/apt/lists/*
+
+# install bootstrap tools
+RUN apt-get update && apt-get install --no-install-recommends -y \
+    build-essential \
+    python-rosdep \
+    python-rosinstall \
+    python-vcstools \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN rosdep init && \
+  rosdep update --rosdistro melodic
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-melodic-ros-base=1.4.1-0* \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-melodic-robot=1.4.1-0* \
+    && rm -rf /var/lib/apt/lists/*
+
+#RUN apt-get update --fix-missing
+#RUN apt-get install python-tf2-ros
+
+RUN apt-get update --fix-missing
+RUN apt-get install ros-melodic-cv-bridge -y
+
+############################ Installing python packages ########################
+
+RUN pip install pyyaml rospkg pyrealsense2 numpy scikit-build
+
+############################ Compiling ROB9 ####################################
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+ARG INCUBATOR_VER=unknown
+WORKDIR /ROB9/src
+COPY graspGenerator /ROB9/src/graspGenerator
+COPY realsense_service /ROB9/src/realsense_service
+COPY rob9 /ROB9/src/rob9
+WORKDIR /ROB9
+RUN /bin/bash -c '. /opt/ros/melodic/setup.bash; cd /ROB9; catkin_make'
+
+#ENTRYPOINT source /ROB9/devel/setup.bash && source /ROB9/src/rob9/connect.sh && export QT_X11_NO_MITSHM=1 && rosrun grasping grasp_net.py
+ENTRYPOINT source /ROB9/devel/setup.bash && source /ROB9/src/rob9/connect.sh && export QT_X11_NO_MITSHM=1 && /bin/bash

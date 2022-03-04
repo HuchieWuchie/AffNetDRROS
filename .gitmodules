@@ -1,0 +1,6 @@
+[submodule "ptu/flir_ptu"]
+	path = ptu/flir_ptu
+	url = https://github.com/daniellehot/flir_ptu.git
+[submodule "ptu"]
+	path = ptu
+	url = https://github.com/daniellehot/ptu.git

@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: rob9
+    relative_path: urdf/onearm.urdf.xacro
+    xacro_args: ""
+  SRDF:
+    relative_path: config/ur_dummy.srdf
+  CONFIG:
+    author_name: a
+    author_email: b@c.com
+    generated_timestamp: 1637244173
