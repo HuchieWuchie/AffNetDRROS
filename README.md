@@ -1,6 +1,6 @@
 # ROS NODE: Learning to Segment Object Affordances on Synthetic Data for Task-oriented Robotic Handovers"
 
-This repository contains the implementation of the ROS node for our paper "Learning to Segment Object Affordances on Synthetic Data for Task-oriented Robotic Handovers". With this repository task-oriented handover can be performed on an UR5 with a robotiq gripper and an intel realsense D435.
+This repository contains the implementation of the ROS node for our paper "Learning to Segment Object Affordances on Synthetic Data for Task-oriented Robotic Handovers". With this repository task-oriented handover can be performed on the little helper robot with a robotiq gripper and an intel realsense D435.
 
 The other affilated repositories for this paper can be found at.  
 
